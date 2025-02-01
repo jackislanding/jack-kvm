@@ -267,6 +267,9 @@ interface SettingsState {
   debugMode: boolean;
   setDebugMode: (enabled: boolean) => void;
 
+  massStorageEnabled: boolean;
+  setMassStorageEnabled: (enabled: boolean) => void;
+
   // Add new developer mode state
   developerMode: boolean;
   setDeveloperMode: (enabled: boolean) => void;
@@ -285,6 +288,8 @@ export const useSettingsStore = create(
       setDebugMode: enabled => set({ debugMode: enabled }),
 
       massStorageEnabled: true,
+      setMassStorageEnabled: enabled => set({ massStorageEnabled: enabled }),
+
       // Add developer mode with default value
       developerMode: false,
       setDeveloperMode: enabled => set({ developerMode: enabled }),
