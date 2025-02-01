@@ -480,6 +480,7 @@ func rpcSetUsbEmulationState(enabled bool) error {
 
 func rpcGetMassStorageState() (bool, error) {
 	LoadConfig()
+	fmt.Printf("[jsonrpc.go:rpcSetMassStorageEnabled] enabled: %t", config.MassStorageEnabled)
 	return config.MassStorageEnabled, nil
 }
 
@@ -495,7 +496,7 @@ func rpcSetMassStorageState(enabled bool) error {
 			return err
 		}
 	}
-	log.Printf("[jsonrpc.go:rpcSetMassStorageEnabled] enabled: %t", enabled)
+	fmt.Printf("[jsonrpc.go:rpcSetMassStorageEnabled] enabled: %t", enabled)
 	return nil
 }
 
