@@ -867,6 +867,17 @@ export default function SettingsSidebar() {
                 </SettingsItem>
               </>
             )}
+            <SettingsItem
+              title="Mass Storage Enabled"
+              description="Turn on/off mass storage for mounting images"
+            >
+              <Checkbox
+                defaultChecked={settings.debugMode}
+                onChange={e => {
+                  settings.setDebugMode(e.target.checked);
+                }}
+              />
+            </SettingsItem>
             {settings.debugMode && (
               <SettingsItem
                 title="Reset Configuration"

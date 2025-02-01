@@ -284,6 +284,7 @@ export const useSettingsStore = create(
       debugMode: import.meta.env.DEV,
       setDebugMode: enabled => set({ debugMode: enabled }),
 
+      massStorageEnabled: true,
       // Add developer mode with default value
       developerMode: false,
       setDeveloperMode: enabled => set({ developerMode: enabled }),
