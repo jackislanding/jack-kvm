@@ -875,7 +875,7 @@ export default function SettingsSidebar() {
                 defaultChecked={settings.massStorageEnabled}
                 onChange={e => {
                   settings.setMassStorageEnabled(e.target.checked);
-                  send("setMassStorageMode", e.target.checked)
+                  send("setMassStorageState", e.target.checked)
                 }}
               />
             </SettingsItem>
