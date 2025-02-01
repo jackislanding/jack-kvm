@@ -215,7 +215,7 @@ func writeGadgetConfig() error {
 	return nil
 }
 
-func disableMassStorage() error {
+func DisableMassStorage() error {
 	massStoragePath := path.Join(kvmGadgetPath, "functions", "mass_storage.usb0")
 	err := os.MkdirAll(massStoragePath, 0755)
 	if err != nil {
@@ -230,6 +230,38 @@ func disableMassStorage() error {
 	err = writeGadgetAttrs(lun0Path, [][]string{
 		{"removable", "1"},
 		{"file", ""},
+	})
+
+	err = rebindUsb()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func EnableMassStorage() error {
+	massStoragePath := path.Join(kvmGadgetPath, "functions", "mass_storage.usb0")
+	err := os.MkdirAll(massStoragePath, 0755)
+	if err != nil {
+		return err
+	}
+
+	err = writeGadgetAttrs(massStoragePath, [][]string{
+		{"stall", "1"},
+	})
+
+	lun0Path := path.Join(massStoragePath, "lun.0")
+	err = os.MkdirAll(lun0Path, 0755)
+	if err != nil {
+		return err
+	}
+	err = writeGadgetAttrs(lun0Path, [][]string{
+		{"cdrom", "1"},
+		{"ro", "1"},
+		{"removable", "1"},
+		{"file", "\n"},
+		{"inquiry_string", "JetKVM Virtual Media"},
 	})
 
 	err = rebindUsb()

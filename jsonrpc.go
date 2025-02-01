@@ -478,6 +478,27 @@ func rpcSetUsbEmulationState(enabled bool) error {
 	}
 }
 
+func rpcGetMassStorageState() (bool, error) {
+	LoadConfig()
+	return config.MassStorageEnabled, nil
+}
+
+func rpcSetMassStorageState(enabled bool) error {
+	if enabled {
+		err := DisableMassStorage()
+		if err != nil {
+			return err
+		}
+	} else {
+		err := EnableMassStorage()
+		if err != nil {
+			return err
+		}
+	}
+	log.Printf("[jsonrpc.go:rpcSetMassStorageEnabled] enabled: %t", enabled)
+	return nil
+}
+
 func rpcGetWakeOnLanDevices() ([]WakeOnLanDevice, error) {
 	LoadConfig()
 	if config.WakeOnLanDevices == nil {
@@ -539,6 +560,8 @@ var rpcHandlers = map[string]RPCHandler{
 	"setSSHKeyState":         {Func: rpcSetSSHKeyState, Params: []string{"sshKey"}},
 	"setMassStorageMode":     {Func: rpcSetMassStorageMode, Params: []string{"mode"}},
 	"getMassStorageMode":     {Func: rpcGetMassStorageMode},
+	"setMassStorageState":    {Func: rpcSetMassStorageState, Params: []string{"enabled"}},
+	"getMassStorageState":    {Func: rpcGetMassStorageState},
 	"isUpdatePending":        {Func: rpcIsUpdatePending},
 	"getUsbEmulationState":   {Func: rpcGetUsbEmulationState},
 	"setUsbEmulationState":   {Func: rpcSetUsbEmulationState, Params: []string{"enabled"}},
