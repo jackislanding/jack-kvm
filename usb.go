@@ -215,6 +215,31 @@ func writeGadgetConfig() error {
 	return nil
 }
 
+func disableMassStorage() error {
+	massStoragePath := path.Join(kvmGadgetPath, "functions", "mass_storage.usb0")
+	err := os.MkdirAll(massStoragePath, 0755)
+	if err != nil {
+		return err
+	}
+
+	lun0Path := path.Join(massStoragePath, "lun.0")
+	err = os.MkdirAll(lun0Path, 0755)
+	if err != nil {
+		return err
+	}
+	err = writeGadgetAttrs(lun0Path, [][]string{
+		{"removable", "1"},
+		{"file", ""},
+	})
+
+	err = rebindUsb()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func rebindUsb() error {
 	err := os.WriteFile("/sys/bus/platform/drivers/dwc3/unbind", []byte(udc), 0644)
 	if err != nil {
