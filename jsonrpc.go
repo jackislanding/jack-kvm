@@ -486,12 +486,12 @@ func rpcGetMassStorageState() (bool, error) {
 
 func rpcSetMassStorageState(enabled bool) error {
 	if enabled {
-		err := DisableMassStorage()
+		err := EnableMassStorage()
 		if err != nil {
 			return err
 		}
 	} else {
-		err := EnableMassStorage()
+		err := DisableMassStorage()
 		if err != nil {
 			return err
 		}

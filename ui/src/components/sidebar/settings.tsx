@@ -228,6 +228,24 @@ export default function SettingsSidebar() {
     [send, setDeveloperMode],
   );
 
+  const handleMassStorageStateChange = useCallback(
+      (enabled: boolean) => {
+        send("setMassStorageState", { enabled: enabled }, resp => {
+          if ("error" in resp) {
+            notifications.error(
+                `Failed to set mass storage state: ${resp.error.data || "Unknown error"}`,
+            );
+            return;
+          }
+          settings.setMassStorageEnabled(enabled);
+          setTimeout(() => {
+            sidebarRef.current?.scrollTo({ top: 5000, behavior: "smooth" });
+          }, 0);
+        });
+      },
+      [send, settings],
+  );
+
   const handleUpdateSSHKey = useCallback(() => {
     send("setSSHKeyState", { sshKey }, resp => {
       if ("error" in resp) {
@@ -874,8 +892,7 @@ export default function SettingsSidebar() {
               <Checkbox
                 defaultChecked={settings.massStorageEnabled}
                 onChange={e => {
-                  settings.setMassStorageEnabled(e.target.checked);
-                  send("setMassStorageState", e.target.checked)
+                  handleMassStorageStateChange(e.target.checked)
                 }}
               />
             </SettingsItem>

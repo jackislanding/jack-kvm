@@ -216,21 +216,13 @@ func writeGadgetConfig() error {
 }
 
 func DisableMassStorage() error {
+	fmt.Println("[usb.go:DisableMassStorage] called")
 	massStoragePath := path.Join(kvmGadgetPath, "functions", "mass_storage.usb0")
-	err := os.MkdirAll(massStoragePath, 0755)
-	if err != nil {
-		return err
-	}
 
-	lun0Path := path.Join(massStoragePath, "lun.0")
-	err = os.MkdirAll(lun0Path, 0755)
+	err := os.Symlink(massStoragePath, path.Join(configC1Path, "mass_storage.usb0"))
 	if err != nil {
 		return err
 	}
-	err = writeGadgetAttrs(lun0Path, [][]string{
-		{"removable", "1"},
-		{"file", ""},
-	})
 
 	err = rebindUsb()
 	if err != nil {
@@ -241,6 +233,7 @@ func DisableMassStorage() error {
 }
 
 func EnableMassStorage() error {
+	fmt.Println("[usb.go:EnableMassStorage] called")
 	massStoragePath := path.Join(kvmGadgetPath, "functions", "mass_storage.usb0")
 	err := os.MkdirAll(massStoragePath, 0755)
 	if err != nil {
