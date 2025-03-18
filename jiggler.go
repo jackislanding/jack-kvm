@@ -1,8 +1,25 @@
 package kvm
 
 import (
+	"math"
+	"math/rand"
 	"time"
 )
+
+type JigglerConfig struct {
+	coordX          int
+	coordY          int
+	intervalSeconds float64
+	jitterSeconds   float64
+	lastInterval    float64
+}
+
+func (j *JigglerConfig) calcNewInterval() {
+	jitter := (rand.Float64() * j.jitterSeconds * 2) - j.jitterSeconds
+	logger.Infof("jiggler jitter: %v", jitter)
+	j.lastInterval = math.Max(0, j.intervalSeconds+jitter)
+	logger.Infof("jiggler new interval: %v", j.lastInterval)
+}
 
 var lastUserInput = time.Now()
 
@@ -17,14 +34,21 @@ func rpcGetJigglerState() bool {
 
 func init() {
 	ensureConfigLoaded()
-
-	go runJiggler()
+	jc := &JigglerConfig{
+		coordX:          0,
+		coordY:          0,
+		intervalSeconds: 20,
+		jitterSeconds:   2,
+		lastInterval:    0,
+	}
+	jc.calcNewInterval()
+	go runJiggler(jc)
 }
 
-func runJiggler() {
+func runJiggler(j *JigglerConfig) {
 	for {
 		if jigglerEnabled {
-			if time.Since(lastUserInput) > 20*time.Second {
+			if time.Since(lastUserInput) > time.Duration(j.lastInterval)*time.Second {
 				//TODO: change to rel mouse
 				err := rpcAbsMouseReport(1, 1, 0)
 				if err != nil {
@@ -36,6 +60,7 @@ func runJiggler() {
 				}
 			}
 		}
-		time.Sleep(20 * time.Second)
+		time.Sleep(time.Duration(j.lastInterval) * time.Second)
+		j.calcNewInterval()
 	}
 }

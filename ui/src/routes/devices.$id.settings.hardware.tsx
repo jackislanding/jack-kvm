@@ -8,7 +8,7 @@ import notifications from "../notifications";
 import { SelectMenuBasic } from "@components/SelectMenuBasic";
 import { UsbConfigSetting } from "../components/UsbConfigSetting";
 import { UsbDeviceSetting } from "@components/UsbDeviceSetting";
-import { FeatureFlag } from "../components/FeatureFlag";
+// import { FeatureFlag } from "../components/FeatureFlag";
 
 export default function SettingsHardwareRoute() {
   const [send] = useJsonRpc();
@@ -129,14 +129,8 @@ export default function SettingsHardwareRoute() {
           The display will wake up when the connection state changes, or when touched.
         </p>
       </div>
-
-      <FeatureFlag minAppVersion="0.3.8">
-        <UsbConfigSetting />
-      </FeatureFlag>
-
-      <FeatureFlag minAppVersion="0.3.8">
-        <UsbDeviceSetting />
-      </FeatureFlag>
+      <UsbConfigSetting />
+      <UsbDeviceSetting />
     </div>
   );
 }
