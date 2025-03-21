@@ -12,6 +12,8 @@ type JigglerConfig struct {
 	intervalSeconds float64
 	jitterSeconds   float64
 	lastInterval    float64
+	screenWidth     int
+	screenHeight    int
 }
 
 func (j *JigglerConfig) calcNewInterval() {
@@ -40,6 +42,8 @@ func init() {
 		intervalSeconds: 5,
 		jitterSeconds:   2,
 		lastInterval:    0,
+		screenWidth:     1920,
+		screenHeight:    1080,
 	}
 	j.calcNewInterval()
 	go j.runJiggler()
@@ -72,7 +76,7 @@ func (j *JigglerConfig) move(targetX int, targetY int, speedFactor float64) {
 	logger.Infof("[jiggler.go:move] nodes: %v", nodes)
 	curvesX, curvesY := j.generatePathCoordinates(nodes, targetX, targetY)
 	logger.Infof("[jiggler.go:move] \ncurvesX: %v\ncurvesY: %v", curvesX, curvesY)
-	//trajectory := computeTrajectory(nodes, curvesX, curvesY)
+	//trajectory := j.computeTrajectory(nodes, curvesX, curvesY)
 	//interval := calculateMovementInterval(curvesX, curvesY, speedFactor)
 	//performMovement(trajectory, interval)
 }
@@ -84,9 +88,13 @@ func (j *JigglerConfig) generatePathCoordinates(nodes int, targetX int, targetY 
 	return applyCoordinateVariance(float64(variance), nodes, coordsX, coordsY)
 }
 
+func (j *JigglerConfig) largestScreenDimension() int {
+	return max(j.screenWidth, j.screenHeight)
+}
+
 func generateBaseCoordinates(nodes int, x1 int, y1 int, x2 int, y2 int) ([]float64, []float64) {
-	coordsX := linspace2(float64(x1), float64(x2), nodes)
-	coordsY := linspace2(float64(y1), float64(y2), nodes)
+	coordsX := linspace(float64(x1), float64(x2), nodes)
+	coordsY := linspace(float64(y1), float64(y2), nodes)
 	return coordsX, coordsY
 }
 
@@ -100,7 +108,7 @@ func randRange(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
-func linspace2(start, stop float64, steps int) []float64 {
+func linspace(start, stop float64, steps int) []float64 {
 	result := make([]float64, steps)
 	stepSize := (stop - start) / float64(steps-1)
 
@@ -143,4 +151,67 @@ func randomNormalSamples(mean float64, stdDev float64, nSamples int) []float64 {
 		samples[x] = rand.NormFloat64()*stdDev + mean
 	}
 	return samples
+}
+
+//func (j *JigglerConfig) computeTrajectory(nodes int, x []int, y []int) ([]float64, []float64) {
+//	unique_mask := createBooleanArray(len(x), true)
+//	for i := range x {
+//		if x[i] == x[i-1] && y[i] == y[i-1] {
+//			unique_mask[i] = false
+//		}
+//	}
+//	x = x[unique_mask]
+//	y = y[unique_mask]
+//
+//	if len(x) < 4 {
+//		t_points := linspace(0, 1, j.largestScreenDimension())
+//		x_interp := np.interp(t_points, linspace(0, 1, len(x)), x)
+//		y_interp := np.interp(t_points, linspace(0, 1, len(y)), y)
+//		return x_interp, y_interp
+//	}
+//
+//	try:
+//		curveDegree := min(3, len(x) - 1)
+//		spline_params, _ := makeSplprep(x, y, curveDegree)
+//		//spline_params, _ = interpolate.splprep([x, y], k=curveDegree, s=0)
+//		t_points := linspace(0, 1, j.largestScreenDimension())
+//		return interpolate.splev(t_points, spline_params)
+//	except ValueError:
+//		t_points := linspace(0, 1, j.largestScreenDimension())
+//		x_interp := np.interp(t_points, linspace(0, 1, len(x)), x)
+//		y_interp := np.interp(t_points, linspace(0, 1, len(y)), y)
+//	return x_interp, y_interp
+//}
+
+func createBooleanArray(length int, value bool) []bool {
+	// Create a slice with the given length and initialize all elements with the provided value
+	array := make([]bool, length)
+	for i := range array {
+		array[i] = value
+	}
+	return array
+}
+
+// makeSplprep creates a B-spline representation for a curve
+func makeSplprep(x, y []float64, degree int) (knots []float64, coefficients []float64) {
+	n := len(x)
+	if n != len(y) {
+		panic("x and y arrays must have the same length")
+	}
+
+	// Generate uniform knots vector
+	knots = make([]float64, n+degree+1)
+	for i := 0; i <= n; i++ {
+		knots[i] = float64(i)
+	}
+	for i := n + 1; i < len(knots); i++ {
+		knots[i] = float64(n)
+	}
+
+	// Set up the matrix system for spline coefficients (simplified approach)
+	// Here we directly take the y values as the spline coefficients for simplicity
+	// This is a rough approximation and doesn't solve the system for real B-spline coefficients
+	coefficients = append([]float64{}, y...)
+
+	return knots, coefficients
 }
